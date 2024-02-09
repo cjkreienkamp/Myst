@@ -41,7 +41,7 @@ Rectangle {
 
         Image {
             id: specialCardsImage
-            height: myHandRectangle.height*13/15
+            height: myHandRectangle.height
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             fillMode: Image.PreserveAspectFit
@@ -569,7 +569,7 @@ Rectangle {
         Rectangle {
             id: myHandRectangle
             height: myFieldRectangle.height/4
-            color: "#86ae86"
+            color: "#ded299"
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
