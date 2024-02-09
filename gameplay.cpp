@@ -97,8 +97,19 @@ void GamePlay::startNewRound()
     updateScores();
     m_myHasPassed = false; emit myHasPassedChanged();
     m_enemyHasPassed = false; emit enemyHasPassedChanged();
-    m_myHand.push_back( drawCard() );
-    m_enemyHand.push_back( drawCard() );
+
+    if ( ( round == 2 && (
+                          (m_roundWinners[0] == m_roundWinners[1] && m_roundWinners[0] != 't') ||
+                          (m_roundWinners[0] == 't' && m_roundWinners[1] != 't') ||
+                          (m_roundWinners[1] == 't' && m_roundWinners[0] != 't')
+                         )
+         ) || round == 3) {
+        m_isGameStarted = false;
+        emit isGameStartedChanged();
+    } else {
+        m_myHand.push_back( drawCard() );
+        m_enemyHand.push_back( drawCard() );
+    }
 
     emit roundWinnersChanged();
     emit myHandChanged();
@@ -284,3 +295,7 @@ void GamePlay::setEnemyHasPassed( bool passed )
     changeTurn();
 }
 
+void GamePlay::exitGame()
+{
+    qDebug() << "exit";
+}

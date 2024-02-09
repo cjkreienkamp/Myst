@@ -58,6 +58,7 @@ Rectangle {
             anchors.leftMargin: 5
             font.pixelSize: myPassButton.width/2
             onClicked: gamePlay.setMyHasPassed(true)
+            enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
 
             Text {
                 text: qsTr("My Pass")
@@ -81,6 +82,7 @@ Rectangle {
             anchors.leftMargin: 5
             font.pixelSize: enemyPassButton.width/2
             onClicked: gamePlay.setEnemyHasPassed(true)
+            enabled: {!gamePlay.isMyTurn && gamePlay.isGameStarted}
 
             Text {
                 text: qsTr("Enemy Pass")
@@ -102,7 +104,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        Button {
+        /*Button {
             id: startGameButton
             height: parent.height/8
             anchors.right: parent.right
@@ -132,7 +134,7 @@ Rectangle {
                 font.bold: true
                 anchors.horizontalCenter: parent.horizontalCenter
             }
-        }
+        }*/
 
         Rectangle {
             id: enemyScoreRectangleGlow
@@ -385,7 +387,7 @@ Rectangle {
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
-                            enabled: !gamePlay.isMyTurn
+                            enabled: {!gamePlay.isMyTurn && gamePlay.isGameStarted}
                             onClicked: enemyFieldRectangle.moveCardFromEnemyHandToField(name)
                         }
 
@@ -621,7 +623,7 @@ Rectangle {
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
-                            enabled: gamePlay.isMyTurn
+                            enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
                             onClicked: myFieldRectangle.moveCardFromMyHandToField(name)
                         }
                     }
@@ -762,5 +764,137 @@ Rectangle {
         anchors.bottom: myFieldRectangle.top
         anchors.left: specialCardsRectangle.right
         anchors.right: scoreRectangle.left
+    }
+
+    Rectangle {
+        id: menuShadow
+        anchors.fill: parent
+        color: "#000000"
+        opacity: 0.4
+        visible: !gamePlay.isGameStarted
+    }
+
+    Rectangle {
+        id: menuRectangle
+        height: parent.height/4
+        width: parent.width/1.5
+        anchors.centerIn: parent
+        color: "#a7c9e3"
+        radius: 10
+        visible: !gamePlay.isGameStarted
+
+        Text {
+            text: {
+                if (gamePlay.roundWinners == 'xxx') return ""
+                else if (gamePlay.roundWinners[2] == 'x') {
+                    if (gamePlay.roundWinners[0] == 'e' || gamePlay.roundWinners[1] == 'e' )
+                        return "YOU LOSE!"
+                    else return "YOU WIN!"
+                } else {
+                    if (gamePlay.roundWinners[2] == 'e') return "YOU LOSE!"
+                    else if (gamePlay.roundWinners[2] == 'm') return "YOU WIN!"
+                    else return "DRAW!"
+                }
+            }
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.bottom: parent.verticalCenter
+            anchors.topMargin: parent.height/16
+            anchors.bottomMargin: parent.height/16
+            font.pixelSize: parent.height/4
+            font.bold: true
+        }
+
+        Button {
+            id: startGameButton
+            height: parent.height/1.5
+            width: parent.width/1.5
+            anchors.centerIn: parent
+            onClicked: {
+                mySpadesListModel.clear()
+                myDiamondsListModel.clear()
+                myClubsListModel.clear()
+                enemySpadesListModel.clear()
+                enemyDiamondsListModel.clear()
+                enemyClubsListModel.clear()
+                specialCardsImage.source = "images/back_of_card.png"
+                gamePlay.startNewGame()
+            }
+            visible: {
+                if (gamePlay.roundWinners == 'xxx') return true
+                else false
+            }
+
+            Text {
+                text: qsTr("Start Game")
+                anchors.centerIn: parent
+                font.pixelSize: menuRectangle.height/4
+                font.bold: true
+            }
+        }
+
+        Button {
+            id: playAgainButton
+            height: parent.height/8
+            anchors.right: parent.horizontalCenter
+            anchors.top: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: parent.width/16
+            anchors.leftMargin: parent.width/16
+            anchors.topMargin: parent.height/16
+            anchors.bottomMargin: parent.height/16
+            font.pixelSize: playAgainButton.height/2
+            onClicked: {
+                mySpadesListModel.clear()
+                myDiamondsListModel.clear()
+                myClubsListModel.clear()
+                enemySpadesListModel.clear()
+                enemyDiamondsListModel.clear()
+                enemyClubsListModel.clear()
+                specialCardsImage.source = "images/back_of_card.png"
+                gamePlay.startNewGame()
+            }
+            visible: {
+                if (gamePlay.roundWinners == 'xxx') return false
+                else true
+            }
+
+
+            Text {
+                text: qsTr("Play Again")
+                anchors.centerIn: parent
+                font.pixelSize: parent.height/4
+                font.bold: true
+            }
+        }
+
+        Button {
+            id: exitButton
+            height: parent.height/8
+            anchors.right: parent.right
+            anchors.top: parent.verticalCenter
+            anchors.left: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: parent.width/16
+            anchors.leftMargin: parent.width/16
+            anchors.topMargin: parent.height/16
+            anchors.bottomMargin: parent.height/16
+            font.pixelSize: exitButton.height/2
+            onClicked: gamePlay.exitGame()
+            visible: {
+                if (gamePlay.roundWinners == 'xxx') return false
+                else true
+            }
+
+
+            Text {
+                text: qsTr("Exit")
+                anchors.centerIn: parent
+                font.pixelSize: parent.height/4
+                font.bold: true
+            }
+
+        }
     }
 }

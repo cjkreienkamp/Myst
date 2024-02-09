@@ -70,11 +70,7 @@ public slots:
     void addToCardsPlayedThisRound( QString );
     void setMyHasPassed( bool );
     void setEnemyHasPassed( bool );
-    //void setRoundWinners( QString );
-    // clean
-    // fit all cards within their area
-    // rotate cards when ace is played
-    // git
+    void exitGame();
 };
 
 #endif // GAMEPLAY_H
