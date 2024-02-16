@@ -57,7 +57,7 @@ Rectangle {
             anchors.bottomMargin: 10
             anchors.leftMargin: 5
             font.pixelSize: myPassButton.width/2
-            onClicked: gamePlay.setMyHasPassed(true)
+            onClicked: gamePlay.startMyNextTurn("pass")
             enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
 
             Text {
@@ -103,38 +103,6 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-
-        /*Button {
-            id: startGameButton
-            height: parent.height/8
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.rightMargin: 5
-            anchors.topMargin: 5
-            anchors.leftMargin: 5
-            font.pixelSize: startGameButton.height/2
-            onClicked: {
-                mySpadesListModel.clear()
-                myDiamondsListModel.clear()
-                myClubsListModel.clear()
-                enemySpadesListModel.clear()
-                enemyDiamondsListModel.clear()
-                enemyClubsListModel.clear()
-                specialCardsImage.source = "images/back_of_card.png"
-                gamePlay.startNewGame()
-            }
-
-            Text {
-                text: qsTr("Start \nGame")
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: parent.height/6
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-        }*/
 
         Rectangle {
             id: enemyScoreRectangleGlow
@@ -331,8 +299,6 @@ Rectangle {
                     }
                 }
             }
-            gamePlay.addToCardsPlayedThisRound(imageName)
-            gamePlay.changeTurn()
         }
 
         Rectangle {
@@ -352,10 +318,13 @@ Rectangle {
 
                 Connections {
                     target: gamePlay
-                    onMyHandChanged: {
+                    onEnemyHandChanged: {
                         enemyHandListModel.clear();
                         for (var card of gamePlay.enemyHand)
                             enemyHandListModel.append({name: card});
+                    }
+                    onEnemyChoiceChanged: {
+                        enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyChoice)
                     }
                 }
 
@@ -564,8 +533,7 @@ Rectangle {
                     }
                 }
             }
-            gamePlay.addToCardsPlayedThisRound(imageName)
-            gamePlay.changeTurn()
+            gamePlay.startMyNextTurn(imageName)
         }
 
         Rectangle {
@@ -624,7 +592,9 @@ Rectangle {
                             id: mouseArea
                             anchors.fill: parent
                             enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
-                            onClicked: myFieldRectangle.moveCardFromMyHandToField(name)
+                            onClicked: {
+                                myFieldRectangle.moveCardFromMyHandToField(name)
+                            }
                         }
                     }
                 }
@@ -810,16 +780,7 @@ Rectangle {
             height: parent.height/1.5
             width: parent.width/1.5
             anchors.centerIn: parent
-            onClicked: {
-                mySpadesListModel.clear()
-                myDiamondsListModel.clear()
-                myClubsListModel.clear()
-                enemySpadesListModel.clear()
-                enemyDiamondsListModel.clear()
-                enemyClubsListModel.clear()
-                specialCardsImage.source = "images/back_of_card.png"
-                gamePlay.startNewGame()
-            }
+            onClicked: gamePlay.startNewGame()
             visible: {
                 if (gamePlay.roundWinners == 'xxx') return true
                 else false
@@ -845,16 +806,7 @@ Rectangle {
             anchors.topMargin: parent.height/16
             anchors.bottomMargin: parent.height/16
             font.pixelSize: playAgainButton.height/2
-            onClicked: {
-                mySpadesListModel.clear()
-                myDiamondsListModel.clear()
-                myClubsListModel.clear()
-                enemySpadesListModel.clear()
-                enemyDiamondsListModel.clear()
-                enemyClubsListModel.clear()
-                specialCardsImage.source = "images/back_of_card.png"
-                gamePlay.startNewGame()
-            }
+            onClicked: gamePlay.startNewGame()
             visible: {
                 if (gamePlay.roundWinners == 'xxx') return false
                 else true

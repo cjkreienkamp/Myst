@@ -13,9 +13,12 @@ class GamePlay : public QObject
     Q_PROPERTY(bool myHasPassed READ myHasPassed WRITE setMyHasPassed NOTIFY myHasPassedChanged FINAL)
     Q_PROPERTY(bool enemyHasPassed READ enemyHasPassed WRITE setEnemyHasPassed NOTIFY enemyHasPassedChanged FINAL)
     Q_PROPERTY(bool isGameStarted READ isGameStarted NOTIFY isGameStartedChanged FINAL)
+    Q_PROPERTY(bool isMyCardChosen READ isMyCardChosen WRITE setIsMyCardChosen NOTIFY isMyCardChosenChanged FINAL)
     Q_PROPERTY(int myScore READ myScore NOTIFY myScoreChanged FINAL)
     Q_PROPERTY(int enemyScore READ enemyScore NOTIFY enemyScoreChanged FINAL)
     Q_PROPERTY(QString roundWinners READ roundWinners NOTIFY roundWinnersChanged FINAL)
+    Q_PROPERTY(QString enemyChoice READ enemyChoice NOTIFY enemyChoiceChanged FINAL)
+    Q_PROPERTY(QString myChoice READ myChoice WRITE setMyChoice NOTIFY myChoiceChanged FINAL)
 
 private:
     std::vector<std::string> possible_cards { "XX", "XX",
@@ -28,16 +31,21 @@ private:
     std::vector<std::string> m_cardsPlayedThisRound{};
     bool m_myHasPassed;
     bool m_enemyHasPassed;
+    bool m_isMyCardChosen;
     bool m_isMyTurn;
     bool m_isGameStarted;
     int m_myScore;
     int m_enemyScore;
+    std::string m_enemyChoice;
+    std::string m_myChoice;
     std::string m_roundWinners;
     std::string drawCard();
     std::string fromCardNotationToImageName(std::string);
     std::string fromImageNameToCardNotation(std::string);
     void updateScores();
+    void startNextTurn();
     void startNewRound();
+    QString chooseEnemyCard();
 
 public:
     explicit GamePlay(QObject *parent = nullptr);
@@ -48,9 +56,12 @@ public:
     bool enemyHasPassed();
     bool isMyTurn();
     bool isGameStarted();
+    bool isMyCardChosen();
     int myScore();
     int enemyScore();
     QString roundWinners();
+    QString enemyChoice();
+    QString myChoice();
 
 signals:
     QList<QString> myHandChanged();
@@ -58,11 +69,14 @@ signals:
     QList<QString> cardsPlayedThisRoundChanged();
     bool myHasPassedChanged();
     bool enemyHasPassedChanged();
+    bool isMyCardChosenChanged();
     bool isMyTurnChanged();
     bool isGameStartedChanged();
     int myScoreChanged();
     int enemyScoreChanged();
     QString roundWinnersChanged();
+    QString enemyChoiceChanged();
+    QString myChoiceChanged();
 
 public slots:
     void startNewGame();
@@ -70,7 +84,11 @@ public slots:
     void addToCardsPlayedThisRound( QString );
     void setMyHasPassed( bool );
     void setEnemyHasPassed( bool );
+    void setIsMyCardChosen( bool );
+    void setMyChoice( QString );
     void exitGame();
+    void sleep();
+    void startMyNextTurn( QString );
 };
 
 #endif // GAMEPLAY_H

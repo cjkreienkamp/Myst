@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 #include <regex>
+#include <thread>
+#include <chrono>
 
 std::string GamePlay::drawCard()
 {
@@ -82,8 +84,6 @@ void GamePlay::updateScores()
 
 void GamePlay::startNewRound()
 {
-    updateScores();
-
     int round;
     if (m_roundWinners[0] == 'x') round = 1;
     else if (m_roundWinners[1] == 'x') round = 2;
@@ -92,6 +92,7 @@ void GamePlay::startNewRound()
     if (m_myScore > m_enemyScore) m_roundWinners[round-1] = 'm';
     else if (m_myScore < m_enemyScore) m_roundWinners[round-1] = 'e';
     else m_roundWinners[round-1] = 't';
+    emit roundWinnersChanged();
 
     m_cardsPlayedThisRound.clear();
     updateScores();
@@ -104,16 +105,13 @@ void GamePlay::startNewRound()
                           (m_roundWinners[1] == 't' && m_roundWinners[0] != 't')
                          )
          ) || round == 3) {
-        m_isGameStarted = false;
-        emit isGameStartedChanged();
+        m_isGameStarted = false; emit isGameStartedChanged();
     } else {
-        m_myHand.push_back( drawCard() );
-        m_enemyHand.push_back( drawCard() );
+        m_myHand.push_back( drawCard() ); emit myHandChanged();
+        m_enemyHand.push_back( drawCard() ); emit enemyHandChanged();
     }
 
-    emit roundWinnersChanged();
-    emit myHandChanged();
-    emit enemyHandChanged();
+    startNextTurn();
 }
 
 GamePlay::GamePlay(QObject *parent)
@@ -122,6 +120,7 @@ GamePlay::GamePlay(QObject *parent)
     , m_enemyScore(0)
     , m_roundWinners("xxx")
     , m_isGameStarted(false)
+    , m_isMyCardChosen(false)
 {}
 
 QList<QString> GamePlay::myHand()
@@ -176,6 +175,11 @@ bool GamePlay::isGameStarted()
     return m_isGameStarted;
 }
 
+bool GamePlay::isMyCardChosen()
+{
+    return m_isMyCardChosen;
+}
+
 int GamePlay::myScore()
 {
     return m_myScore;
@@ -184,6 +188,16 @@ int GamePlay::myScore()
 int GamePlay::enemyScore()
 {
     return m_enemyScore;
+}
+
+QString GamePlay::enemyChoice()
+{
+    return QString::fromStdString( m_enemyChoice );
+}
+
+QString GamePlay::myChoice()
+{
+    return QString::fromStdString( m_myChoice );
 }
 
 QString GamePlay::roundWinners()
@@ -199,8 +213,8 @@ void GamePlay::startNewGame()
     m_cardsPlayedThisRound.clear();
     updateScores();
     m_roundWinners = "xxx"; emit roundWinnersChanged();
-    m_myHasPassed = false;
-    m_enemyHasPassed = false;
+    m_myHasPassed = false; emit myHasPassedChanged();
+    m_enemyHasPassed = false; emit enemyHasPassedChanged();
     m_isGameStarted = true; emit isGameStartedChanged();
 
     for (int i = 0; i < deck.size() - 1; i++) {
@@ -208,7 +222,7 @@ void GamePlay::startNewGame()
         std::swap(deck[i], deck[j]);
     }
 
-    m_isMyTurn = arc4random() % 2;
+    m_isMyTurn = arc4random() % 2; emit isMyTurnChanged();
 
     if ( m_isMyTurn ) {
         m_myHand.push_back( drawCard() );
@@ -237,38 +251,88 @@ void GamePlay::startNewGame()
 
     emit myHandChanged();
     emit enemyHandChanged();
-    emit isMyTurnChanged();
+
+    startNextTurn();
 }
 
-void GamePlay::changeTurn()
+void GamePlay::startNextTurn()
 {
-    if (m_myHasPassed && m_enemyHasPassed)
+    QString cardPlayedThisTurn;
+    std::string sCardPlayedThisTurn;
+
+    if (m_isMyTurn) {
+        return;
+    } else {
+        cardPlayedThisTurn = chooseEnemyCard();
+        sCardPlayedThisTurn = cardPlayedThisTurn.toUtf8().constData();
+        if (sCardPlayedThisTurn == "pass") {
+            setEnemyHasPassed(true);
+        } else {
+            emit enemyChoiceChanged();
+        }
+    }
+
+    if (sCardPlayedThisTurn != "pass") addToCardsPlayedThisRound(cardPlayedThisTurn);
+
+    if (m_myHasPassed && m_enemyHasPassed) {
         startNewRound();
-    if ( (m_isMyTurn && !m_enemyHasPassed) || (!m_isMyTurn && !m_myHasPassed) ) {
-        m_isMyTurn = !m_isMyTurn;
-        emit isMyTurnChanged();
+    } else {
+        changeTurn();
+        startNextTurn();
     }
 }
 
-void GamePlay::addToCardsPlayedThisRound(QString text)
+void GamePlay::startMyNextTurn( QString card ) {
+    QString cardPlayedThisTurn = card;
+    std::string sCardPlayedThisTurn = cardPlayedThisTurn.toUtf8().constData();
+    if (sCardPlayedThisTurn == "pass") {
+        setMyHasPassed(true);
+    } else {
+        emit myChoiceChanged();
+    }
+
+    if (sCardPlayedThisTurn != "pass") addToCardsPlayedThisRound(cardPlayedThisTurn);
+
+    if (m_myHasPassed && m_enemyHasPassed) {
+        startNewRound();
+    } else {
+        changeTurn();
+        startNextTurn();
+    }
+}
+
+QString GamePlay::chooseEnemyCard()
 {
-    std::string newCard = text.toUtf8().constData();
+    QString card;
+    int index_of_chosen_card = arc4random() % (m_enemyHand.size() + 1);
+    if (index_of_chosen_card == m_enemyHand.size()) {
+        card = "pass";
+    } else {
+        m_enemyChoice = fromCardNotationToImageName(m_enemyHand[index_of_chosen_card]);
+        card = QString::fromStdString( m_enemyChoice );
+    }
+    return card;
+}
+
+void GamePlay::addToCardsPlayedThisRound(QString imageName)
+{
+    std::string newCard = imageName.toUtf8().constData();
     std::string newCardAbbreviated = fromImageNameToCardNotation(newCard);
     if (m_isMyTurn) {
         m_myHand.erase(std::remove(m_myHand.begin(), m_myHand.end(), newCardAbbreviated), m_myHand.end());
         if (newCardAbbreviated[0] == 'J') {
-            m_enemyHand.push_back( drawCard() );
-            m_enemyHand.push_back( drawCard() );
-            emit enemyHandChanged();
+            m_myHand.push_back( drawCard() );
+            m_myHand.push_back( drawCard() );
+            emit myHandChanged();
         }
         newCardAbbreviated.insert(0,"m");
         emit myHandChanged();
     } else {
         m_enemyHand.erase(std::remove(m_enemyHand.begin(), m_enemyHand.end(), newCardAbbreviated), m_enemyHand.end());
         if (newCardAbbreviated[0] == 'J') {
-            m_myHand.push_back( drawCard() );
-            m_myHand.push_back( drawCard() );
-            emit myHandChanged();
+            m_enemyHand.push_back( drawCard() );
+            m_enemyHand.push_back( drawCard() );
+            emit enemyHandChanged();
         }
         newCardAbbreviated.insert(0,"e");
         emit enemyHandChanged();
@@ -281,18 +345,45 @@ void GamePlay::addToCardsPlayedThisRound(QString text)
     updateScores();
 }
 
+void GamePlay::changeTurn()
+{
+    if ( (m_isMyTurn && !m_enemyHasPassed)
+        || (!m_isMyTurn && !m_myHasPassed) ) {
+        m_isMyTurn = !m_isMyTurn; emit isMyTurnChanged();
+    }
+}
+
 void GamePlay::setMyHasPassed( bool passed )
 {
-    m_myHasPassed = passed;
-    emit myHasPassedChanged();
-    changeTurn();
+    if (passed != m_myHasPassed) {
+        m_myHasPassed = !m_myHasPassed; emit myHasPassedChanged();
+    }
+    changeTurn(); //could be messy if passed is changed to false
 }
 
 void GamePlay::setEnemyHasPassed( bool passed )
 {
     m_enemyHasPassed = passed;
     emit enemyHasPassedChanged();
-    changeTurn();
+    changeTurn(); //could be messy if passed is changed to false
+}
+
+void GamePlay::setIsMyCardChosen(bool chosen)
+{
+    if (chosen != m_isMyCardChosen) {
+        m_isMyCardChosen != m_isMyCardChosen; emit isMyCardChosenChanged();
+    }
+}
+
+void GamePlay::setMyChoice(QString card)
+{
+    m_myChoice = card.toUtf8().constData(); emit myChoiceChanged();
+    setIsMyCardChosen(true);
+}
+
+void GamePlay::sleep()
+{
+    std::this_thread::sleep_for( std::chrono::seconds(1) );
 }
 
 void GamePlay::exitGame()
