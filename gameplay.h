@@ -8,17 +8,14 @@ class GamePlay : public QObject
     Q_OBJECT
     Q_PROPERTY(QList<QString> myHand READ myHand NOTIFY myHandChanged FINAL)
     Q_PROPERTY(QList<QString> enemyHand READ enemyHand NOTIFY enemyHandChanged FINAL)
-    Q_PROPERTY(QList<QString> cardsPlayedThisRound READ cardsPlayedThisRound NOTIFY cardsPlayedThisRoundChanged FINAL)
-    Q_PROPERTY(bool isMyTurn READ isMyTurn NOTIFY isMyTurnChanged FINAL)
     Q_PROPERTY(bool myHasPassed READ myHasPassed WRITE setMyHasPassed NOTIFY myHasPassedChanged FINAL)
     Q_PROPERTY(bool enemyHasPassed READ enemyHasPassed WRITE setEnemyHasPassed NOTIFY enemyHasPassedChanged FINAL)
+    Q_PROPERTY(bool isMyTurn READ isMyTurn NOTIFY isMyTurnChanged FINAL)
     Q_PROPERTY(bool isGameStarted READ isGameStarted NOTIFY isGameStartedChanged FINAL)
-    Q_PROPERTY(bool isMyCardChosen READ isMyCardChosen WRITE setIsMyCardChosen NOTIFY isMyCardChosenChanged FINAL)
     Q_PROPERTY(int myScore READ myScore NOTIFY myScoreChanged FINAL)
     Q_PROPERTY(int enemyScore READ enemyScore NOTIFY enemyScoreChanged FINAL)
     Q_PROPERTY(QString roundWinners READ roundWinners NOTIFY roundWinnersChanged FINAL)
-    Q_PROPERTY(QString enemyChoice READ enemyChoice NOTIFY enemyChoiceChanged FINAL)
-    Q_PROPERTY(QString myChoice READ myChoice WRITE setMyChoice NOTIFY myChoiceChanged FINAL)
+    Q_PROPERTY(QString enemyCard READ enemyCard NOTIFY enemyCardPlayed FINAL)
 
 private:
     std::vector<std::string> possible_cards { "XX", "XX",
@@ -31,64 +28,55 @@ private:
     std::vector<std::string> m_cardsPlayedThisRound{};
     bool m_myHasPassed;
     bool m_enemyHasPassed;
-    bool m_isMyCardChosen;
     bool m_isMyTurn;
     bool m_isGameStarted;
     int m_myScore;
     int m_enemyScore;
-    std::string m_enemyChoice;
-    std::string m_myChoice;
+    std::string m_myCard;
+    std::string m_enemyCard;
     std::string m_roundWinners;
     std::string drawCard();
-    std::string fromCardNotationToImageName(std::string);
-    std::string fromImageNameToCardNotation(std::string);
+    std::string fromCardNotationToImageName( std::string );
+    std::string fromImageNameToCardNotation( std::string );
     void updateScores();
     void startNextTurn();
     void startNewRound();
-    QString chooseEnemyCard();
+    std::string chooseEnemyCard();
+    void addToCardsPlayedThisRound( std::string );
+    void setMyHasPassed( bool );
+    void setEnemyHasPassed( bool );
+    void changeTurn();
+    void sleep();
 
-public:
+public: // these are variables (built as functions) that the UI can view
     explicit GamePlay(QObject *parent = nullptr);
     QList<QString> myHand();
     QList<QString> enemyHand();
-    QList<QString> cardsPlayedThisRound();
     bool myHasPassed();
     bool enemyHasPassed();
     bool isMyTurn();
     bool isGameStarted();
-    bool isMyCardChosen();
     int myScore();
     int enemyScore();
     QString roundWinners();
-    QString enemyChoice();
-    QString myChoice();
+    QString enemyCard();
 
-signals:
+signals: // these signal to the UI that it needs to update
     QList<QString> myHandChanged();
     QList<QString> enemyHandChanged();
-    QList<QString> cardsPlayedThisRoundChanged();
     bool myHasPassedChanged();
     bool enemyHasPassedChanged();
-    bool isMyCardChosenChanged();
     bool isMyTurnChanged();
     bool isGameStartedChanged();
     int myScoreChanged();
     int enemyScoreChanged();
     QString roundWinnersChanged();
-    QString enemyChoiceChanged();
-    QString myChoiceChanged();
+    QString enemyCardPlayed();
 
-public slots:
+public slots: // these are functions that the UI can initiate
     void startNewGame();
-    void changeTurn();
-    void addToCardsPlayedThisRound( QString );
-    void setMyHasPassed( bool );
-    void setEnemyHasPassed( bool );
-    void setIsMyCardChosen( bool );
-    void setMyChoice( QString );
+    void playMyCard( QString );
     void exitGame();
-    void sleep();
-    void startMyNextTurn( QString );
 };
 
 #endif // GAMEPLAY_H

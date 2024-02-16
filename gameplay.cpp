@@ -111,7 +111,7 @@ void GamePlay::startNewRound()
         m_enemyHand.push_back( drawCard() ); emit enemyHandChanged();
     }
 
-    startNextTurn();
+    if (!m_isMyTurn) startNextTurn();
 }
 
 GamePlay::GamePlay(QObject *parent)
@@ -120,7 +120,6 @@ GamePlay::GamePlay(QObject *parent)
     , m_enemyScore(0)
     , m_roundWinners("xxx")
     , m_isGameStarted(false)
-    , m_isMyCardChosen(false)
 {}
 
 QList<QString> GamePlay::myHand()
@@ -139,18 +138,6 @@ QList<QString> GamePlay::enemyHand()
 
     for (std::string card : m_enemyHand)
         newList.append( QString::fromStdString( fromCardNotationToImageName(card) ) );
-
-    return newList;
-}
-
-QList<QString> GamePlay::cardsPlayedThisRound()
-{
-    QList<QString> newList;
-
-    for (std::string card : m_cardsPlayedThisRound) {
-        std::string imageName = fromCardNotationToImageName( card );
-        newList.append( QString::fromStdString( imageName ) );
-    }
 
     return newList;
 }
@@ -175,11 +162,6 @@ bool GamePlay::isGameStarted()
     return m_isGameStarted;
 }
 
-bool GamePlay::isMyCardChosen()
-{
-    return m_isMyCardChosen;
-}
-
 int GamePlay::myScore()
 {
     return m_myScore;
@@ -190,14 +172,9 @@ int GamePlay::enemyScore()
     return m_enemyScore;
 }
 
-QString GamePlay::enemyChoice()
+QString GamePlay::enemyCard()
 {
-    return QString::fromStdString( m_enemyChoice );
-}
-
-QString GamePlay::myChoice()
-{
-    return QString::fromStdString( m_myChoice );
+    return QString::fromStdString( m_enemyCard );
 }
 
 QString GamePlay::roundWinners()
@@ -252,92 +229,68 @@ void GamePlay::startNewGame()
     emit myHandChanged();
     emit enemyHandChanged();
 
-    startNextTurn();
+    if (!m_isMyTurn) startNextTurn();
 }
 
 void GamePlay::startNextTurn()
 {
-    QString cardPlayedThisTurn;
-    std::string sCardPlayedThisTurn;
+    std::string cardPlayedThisTurn;
 
     if (m_isMyTurn) {
-        return;
+        cardPlayedThisTurn = m_myCard;
+        if (cardPlayedThisTurn == "pass") setMyHasPassed(true);
     } else {
         cardPlayedThisTurn = chooseEnemyCard();
-        sCardPlayedThisTurn = cardPlayedThisTurn.toUtf8().constData();
-        if (sCardPlayedThisTurn == "pass") {
-            setEnemyHasPassed(true);
-        } else {
-            emit enemyChoiceChanged();
-        }
+        if (cardPlayedThisTurn == "pass") setEnemyHasPassed(true);
+        else emit enemyCardPlayed();
     }
 
-    if (sCardPlayedThisTurn != "pass") addToCardsPlayedThisRound(cardPlayedThisTurn);
+    addToCardsPlayedThisRound(cardPlayedThisTurn);
 
     if (m_myHasPassed && m_enemyHasPassed) {
         startNewRound();
     } else {
         changeTurn();
-        startNextTurn();
+        if (!m_isMyTurn) startNextTurn();
     }
 }
 
-void GamePlay::startMyNextTurn( QString card ) {
-    QString cardPlayedThisTurn = card;
-    std::string sCardPlayedThisTurn = cardPlayedThisTurn.toUtf8().constData();
-    if (sCardPlayedThisTurn == "pass") {
-        setMyHasPassed(true);
-    } else {
-        emit myChoiceChanged();
-    }
-
-    if (sCardPlayedThisTurn != "pass") addToCardsPlayedThisRound(cardPlayedThisTurn);
-
-    if (m_myHasPassed && m_enemyHasPassed) {
-        startNewRound();
-    } else {
-        changeTurn();
-        startNextTurn();
-    }
-}
-
-QString GamePlay::chooseEnemyCard()
+std::string GamePlay::chooseEnemyCard()
 {
-    QString card;
+    std::string card;
     int index_of_chosen_card = arc4random() % (m_enemyHand.size() + 1);
     if (index_of_chosen_card == m_enemyHand.size()) {
         card = "pass";
     } else {
-        m_enemyChoice = fromCardNotationToImageName(m_enemyHand[index_of_chosen_card]);
-        card = QString::fromStdString( m_enemyChoice );
+        card = m_enemyHand[index_of_chosen_card];
+        m_enemyCard = fromCardNotationToImageName( card );
     }
     return card;
 }
 
-void GamePlay::addToCardsPlayedThisRound(QString imageName)
+void GamePlay::addToCardsPlayedThisRound(std::string card)
 {
-    std::string newCard = imageName.toUtf8().constData();
-    std::string newCardAbbreviated = fromImageNameToCardNotation(newCard);
+    if ( card == "pass" ) return;
     if (m_isMyTurn) {
-        m_myHand.erase(std::remove(m_myHand.begin(), m_myHand.end(), newCardAbbreviated), m_myHand.end());
-        if (newCardAbbreviated[0] == 'J') {
+        m_myHand.erase(std::remove(m_myHand.begin(), m_myHand.end(), card), m_myHand.end());
+        if (card[0] == 'J') {
             m_myHand.push_back( drawCard() );
             m_myHand.push_back( drawCard() );
             emit myHandChanged();
         }
-        newCardAbbreviated.insert(0,"m");
+        card.insert(0,"m");
         emit myHandChanged();
     } else {
-        m_enemyHand.erase(std::remove(m_enemyHand.begin(), m_enemyHand.end(), newCardAbbreviated), m_enemyHand.end());
-        if (newCardAbbreviated[0] == 'J') {
+        m_enemyHand.erase(std::remove(m_enemyHand.begin(), m_enemyHand.end(), card), m_enemyHand.end());
+        if (card[0] == 'J') {
             m_enemyHand.push_back( drawCard() );
             m_enemyHand.push_back( drawCard() );
             emit enemyHandChanged();
         }
-        newCardAbbreviated.insert(0,"e");
+        card.insert(0,"e");
         emit enemyHandChanged();
     }
-    m_cardsPlayedThisRound.push_back( newCardAbbreviated );
+    m_cardsPlayedThisRound.push_back( card );
 
     qDebug() << "---------------------------";
     for (auto card : m_cardsPlayedThisRound) qDebug() << card;
@@ -358,27 +311,22 @@ void GamePlay::setMyHasPassed( bool passed )
     if (passed != m_myHasPassed) {
         m_myHasPassed = !m_myHasPassed; emit myHasPassedChanged();
     }
-    changeTurn(); //could be messy if passed is changed to false
 }
 
 void GamePlay::setEnemyHasPassed( bool passed )
 {
-    m_enemyHasPassed = passed;
-    emit enemyHasPassedChanged();
-    changeTurn(); //could be messy if passed is changed to false
-}
-
-void GamePlay::setIsMyCardChosen(bool chosen)
-{
-    if (chosen != m_isMyCardChosen) {
-        m_isMyCardChosen != m_isMyCardChosen; emit isMyCardChosenChanged();
+    if (passed != m_enemyHasPassed) {
+        m_enemyHasPassed = !m_enemyHasPassed; emit enemyHasPassedChanged();
     }
 }
 
-void GamePlay::setMyChoice(QString card)
+void GamePlay::playMyCard(QString card)
 {
-    m_myChoice = card.toUtf8().constData(); emit myChoiceChanged();
-    setIsMyCardChosen(true);
+    m_myCard = card.toUtf8().constData();
+    if ( m_myCard != "pass") {
+        m_myCard = fromImageNameToCardNotation(m_myCard);
+    }
+    startNextTurn();
 }
 
 void GamePlay::sleep()

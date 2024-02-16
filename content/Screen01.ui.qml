@@ -7,11 +7,9 @@ Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-//import QtGraphicalEffects 1.12
 import Christopher 1.0
 
 Rectangle {
-    id: backgroundRectangle
     width: window.width//1920/5.5*1.25
     height: window.height//1080/2.5*1.25
 
@@ -30,162 +28,126 @@ Rectangle {
 
     Rectangle {
         id: specialCardsRectangle
-        width: backgroundRectangle.width/8
+        width: parent.width/8
         color: "#f5caca"
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 0
-        anchors.topMargin: 0
-        anchors.leftMargin: 0
+        anchors {
+            top: parent.top
+            bottom: parent.bottom
+            left: parent.left
+        }
 
         Image {
             id: specialCardsImage
             height: myHandRectangle.height
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
             fillMode: Image.PreserveAspectFit
-        }
-
-        Button {
-            id: myPassButton
-            height: parent.width/3
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.rightMargin: 5
-            anchors.bottomMargin: 10
-            anchors.leftMargin: 5
-            font.pixelSize: myPassButton.width/2
-            onClicked: gamePlay.startMyNextTurn("pass")
-            enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
-
-            Text {
-                text: qsTr("My Pass")
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: parent.width/6
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                verticalCenter: parent.verticalCenter
             }
         }
 
         Button {
-            id: enemyPassButton
-            height: parent.width/3
-            anchors.right: parent.right
-            anchors.bottom: myPassButton.top
-            anchors.left: parent.left
-            anchors.rightMargin: 5
-            anchors.bottomMargin: 5
-            anchors.leftMargin: 5
-            font.pixelSize: enemyPassButton.width/2
-            onClicked: gamePlay.setEnemyHasPassed(true)
-            enabled: {!gamePlay.isMyTurn && gamePlay.isGameStarted}
+            enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
+            onClicked: gamePlay.playMyCard("pass")
+            height: parent.height/10
+            anchors {
+                bottom: parent.bottom; bottomMargin: 10
+                left: parent.left; leftMargin: 5
+                right: parent.right; rightMargin: 5
+            }
 
             Text {
-                text: qsTr("Enemy Pass")
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: parent.width/6
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                text: qsTr("Pass")
+                font.pixelSize: parent.width/4
                 font.bold: true
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.centerIn: parent
             }
         }
     }
 
     Rectangle {
         id: scoreRectangle
-        width: backgroundRectangle.width/6
+        width: parent.width/6
         color: "#c79999"
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        anchors {
+            top: parent.top
+            bottom: parent.bottom
+            right: parent.right
+        }
 
         Rectangle {
-            id: enemyScoreRectangleGlow
-            height: scoreRectangle.height/9 + 8
-            width: enemyScoreRectangleGlow.height
+            visible: !gamePlay.isMyTurn && gamePlay.isGameStarted
             color: "#edf4f9"
-            radius: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.verticalCenter
-            anchors.bottomMargin: parent.height/64
-            visible: {!gamePlay.isMyTurn && gamePlay.isGameStarted}
             opacity: 0.5
+            radius: 10
+            anchors {
+                fill: enemyScoreRectangle; margins: -4
+            }
         }
 
         Rectangle {
             id: enemyScoreRectangle
-            height: scoreRectangle.height/9
-            width: enemyScoreRectangle.height
+            height: parent.height/9
+            width: height
+            radius: 10
             color: {
                 if (gamePlay.enemyHasPassed) return "#000000"
                 else return "#a7c9e3"
             }
-            radius: 10
-            anchors.centerIn: enemyScoreRectangleGlow
-            visible: true
+            anchors {
+                bottom: parent.verticalCenter; bottomMargin: parent.height/64
+                horizontalCenter: parent.horizontalCenter
+            }
 
             Text {
                 text: gamePlay.enemyScore
-                anchors.centerIn: parent
-                font.pixelSize: parent.height/2
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
                 color: {
                     if (gamePlay.enemyHasPassed) return "#a7c9e3"
                     else return "#000000"
                 }
+                font.pixelSize: parent.height/2
+                font.bold: true
+                anchors.centerIn: parent
             }
         }
 
         Rectangle {
-            id: myScoreRectangleGlow
-            height: scoreRectangle.height/9 + 8
-            width: myScoreRectangleGlow.height
+            visible: gamePlay.isMyTurn && gamePlay.isGameStarted
             color: "#edf4f9"
-            radius: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.verticalCenter
-            anchors.topMargin: parent.height/64
-            visible: {gamePlay.isMyTurn && gamePlay.isGameStarted}
             opacity: 0.5
+            radius: 10
+            anchors {
+                fill: myScoreRectangle; margins: -4
+            }
         }
 
         Rectangle {
             id: myScoreRectangle
-            height: scoreRectangle.height/9
-            width: myScoreRectangle.height
+            height: parent.height/9
+            width: height
+            radius: 10
             color: {
                 if (gamePlay.myHasPassed) return "#000000"
                 else return "#a7c9e3"
             }
-            radius: 10
-            anchors.centerIn: myScoreRectangleGlow
-            focus: true
-            visible: true
+            anchors {
+                top: parent.verticalCenter; topMargin: parent.height/64
+                horizontalCenter: parent.horizontalCenter
+            }
 
             Text {
-                id: myScoreText
                 text: gamePlay.myScore
-                anchors.centerIn: parent
-                font.pixelSize: parent.height/2
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
                 color: {
                     if (gamePlay.myHasPassed) return "#a7c9e3"
                     else return "#000000"
                 }
+                font.pixelSize: parent.height/2
+                font.bold: true
+                anchors.centerIn: parent
             }
         }
 
-        function getRoundRectangleColorFromNumber(round)
-        {
+        function getWinnerColorFromRoundNumber(round) {
             var charOfInterest = gamePlay.roundWinners[round-1]
             if (charOfInterest === "m") return "#2478ed"
             else if (charOfInterest === "e") return "#c45656"
@@ -194,68 +156,65 @@ Rectangle {
         }
 
         Rectangle {
-            id: round1Rectangle
+            id: round1Circle
             height: parent.height/12
-            width: round1Rectangle.height
-            color: scoreRectangle.getRoundRectangleColorFromNumber(1)
+            width: height
             radius: 100
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.verticalCenter
-            anchors.topMargin: parent.height*3/16
-            focus: true
+            color: scoreRectangle.getWinnerColorFromRoundNumber(1)
+            anchors {
+                top: parent.verticalCenter; topMargin: parent.height*3/16
+                horizontalCenter: parent.horizontalCenter
+            }
 
             Text {
                 text: qsTr("1")
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.pixelSize: parent.height/2
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
+                font {
+                    pixelSize: parent.height/2
+                    bold: true
+                }
+                anchors.centerIn: parent
             }
         }
 
         Rectangle {
-            id: round2Rectangle
+            id: round2Circle
             height: parent.height/12
-            width: round2Rectangle.height
-            color: scoreRectangle.getRoundRectangleColorFromNumber(2)
+            width: height
             radius: 100
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: round1Rectangle.bottom
-            anchors.topMargin: parent.height/64
-            focus: true
+            color: scoreRectangle.getWinnerColorFromRoundNumber(2)
+            anchors {
+                top: round1Circle.bottom; topMargin: parent.height/64
+                horizontalCenter: parent.horizontalCenter
+            }
 
             Text {
                 text: qsTr("2")
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.pixelSize: parent.height/2
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
+                font {
+                    pixelSize: parent.height/2
+                    bold: true
+                }
+                anchors.centerIn: parent
             }
         }
 
         Rectangle {
-            id: round3Rectangle
+            id: round3Circle
             height: parent.height/12
-            width: round3Rectangle.height
-            color: scoreRectangle.getRoundRectangleColorFromNumber(3)
+            width: height
             radius: 100
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: round2Rectangle.bottom
-            anchors.topMargin: parent.height/64
-            focus: true
+            color: scoreRectangle.getWinnerColorFromRoundNumber(3)
+            anchors {
+                top: round2Circle.bottom; topMargin: parent.height/64
+                horizontalCenter: parent.horizontalCenter
+            }
 
             Text {
                 text: qsTr("3")
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.pixelSize: parent.height/2
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
+                font {
+                    pixelSize: parent.height/2
+                    bold: true
+                }
+                anchors.centerIn: parent
             }
         }
     }
@@ -263,11 +222,12 @@ Rectangle {
     Rectangle {
         id: enemyFieldRectangle
         color: "#ff8f8f"
-        anchors.left: specialCardsRectangle.right
-        anchors.right: scoreRectangle.left
-        anchors.top: parent.top
-        anchors.bottom: parent.verticalCenter
-        anchors.bottomMargin: parent.height/128
+        anchors {
+            left: specialCardsRectangle.right
+            right: scoreRectangle.left
+            top: parent.top
+            bottom: parent.verticalCenter; bottomMargin: parent.height/128
+        }
 
         function moveCardFromEnemyHandToField(imageName) {
             for(var i=0; i<enemyHandListModel.count; ++i)
@@ -305,16 +265,34 @@ Rectangle {
             id: enemyHandRectangle
             height: parent.height/4
             color: "#86ae86"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+            }
 
             Row {
-                id: enemyHandRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: parent.width/50
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
+                }
+
+                ListModel{ id: enemyHandListModel }
+
+                Repeater {
+                    model: enemyHandListModel
+
+                    Image {
+                        source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
+                    }
+                }
 
                 Connections {
                     target: gamePlay
@@ -323,44 +301,8 @@ Rectangle {
                         for (var card of gamePlay.enemyHand)
                             enemyHandListModel.append({name: card});
                     }
-                    onEnemyChoiceChanged: {
-                        enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyChoice)
-                    }
-                }
-
-                ListModel{
-                    id: enemyHandListModel
-
-                    Component.onCompleted: {
-                        for (var card of gamePlay.enemyHand)
-                            myHandListModel.append({name: card});
-                    }
-                }
-
-                Repeater {
-                    id: enemyHandRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    model: enemyHandListModel
-
-                    Image {
-                        id: enemyHandImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
-                        source: name
-
-                        MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            enabled: {!gamePlay.isMyTurn && gamePlay.isGameStarted}
-                            onClicked: enemyFieldRectangle.moveCardFromEnemyHandToField(name)
-                        }
-
-
+                    onEnemyCardPlayed: {
+                        enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyCard)
                     }
                 }
             }
@@ -368,39 +310,34 @@ Rectangle {
 
         Rectangle {
             id: enemyClubsRectangle
-            y: 7
-            height: enemyFieldRectangle.height/4
+            height: parent.height/4
             color: "#c1f9c1"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: enemyHandRectangle.bottom
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: enemyHandRectangle.bottom
+            }
 
             Row {
-                id: enemyClubsRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 10
-
-                ListModel{
-                    id: enemyClubsListModel
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
+                ListModel{ id: enemyClubsListModel }
+
                 Repeater {
-                    id: enemyClubsRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
                     model: enemyClubsListModel
 
                     Image {
-                        id: enemyClubsImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
                         source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
                     }
                 }
             }
@@ -408,42 +345,34 @@ Rectangle {
 
         Rectangle {
             id: enemyDiamondsRectangle
-            y: 4
-            height: enemyFieldRectangle.height/4
+            height: parent.height/4
             color: "#75a975"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: enemyClubsRectangle.bottom
-            anchors.topMargin: 0
-            anchors.rightMargin: 0
-            anchors.leftMargin: 0
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: enemyClubsRectangle.bottom
+            }
 
             Row {
-                id: enemyDiamondsRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 10
-
-                ListModel{
-                    id: enemyDiamondsListModel
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
+                ListModel{ id: enemyDiamondsListModel }
+
                 Repeater {
-                    id: enemyDiamondsRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
                     model: enemyDiamondsListModel
 
                     Image {
-                        id: enemyDiamondsImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
                         source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
                     }
                 }
             }
@@ -451,56 +380,51 @@ Rectangle {
 
         Rectangle {
             id: enemySpadesRectangle
+            height: parent.height/4
             color: "#b7e6b7"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: enemyDiamondsRectangle.bottom
-            anchors.bottom: parent.bottom
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: enemyDiamondsRectangle.bottom
+            }
 
             Row {
-                id: enemySpadesRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 10
-
-                ListModel{
-                    id: enemySpadesListModel
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
+                ListModel{ id: enemySpadesListModel }
+
                 Repeater {
-                    id: enemySpadesRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
                     model: enemySpadesListModel
 
                     Image {
-                        id: enemySpadesImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
                         source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
                     }
                 }
             }
         }
-
     }
 
     Rectangle {
         id: myFieldRectangle
         color: "#ac8686"
-        anchors.left: specialCardsRectangle.right
-        anchors.right: scoreRectangle.left
-        anchors.top: parent.verticalCenter
-        anchors.bottom: parent.bottom
-        anchors.topMargin: parent.height/128
+        anchors {
+            left: specialCardsRectangle.right
+            right: scoreRectangle.left
+            top: parent.verticalCenter; topMargin: parent.height/128
+            bottom: parent.bottom
+        }
 
-        function moveCardFromMyHandToField(imageName)
-        {
+        function moveCardFromMyHandToField(imageName) {
             for(var i=0; i<myHandListModel.count; ++i)
             {
                 if (imageName === myHandListModel.get(i).name)
@@ -533,26 +457,47 @@ Rectangle {
                     }
                 }
             }
-            gamePlay.startMyNextTurn(imageName)
+            gamePlay.playMyCard(imageName)
         }
 
         Rectangle {
             id: myHandRectangle
-            height: myFieldRectangle.height/4
+            height: parent.height/4
             color: "#ded299"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            anchors.rightMargin: 0
-            anchors.leftMargin: 0
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
 
             Row {
-                id: myHandRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: parent.width/50
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
+                }
+
+                ListModel{ id: myHandListModel }
+
+                Repeater {
+                    model: myHandListModel
+
+                    Image {
+                        source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: gamePlay.isMyTurn && gamePlay.isGameStarted
+                            onClicked: myFieldRectangle.moveCardFromMyHandToField(name)
+                        }
+                    }
+                }
 
                 Connections {
                     target: gamePlay
@@ -562,39 +507,39 @@ Rectangle {
                             myHandListModel.append({name: card});
                     }
                 }
+            }
+        }
 
-                ListModel{
-                    id: myHandListModel
+        Rectangle {
+            id: myClubsRectangle
+            height: parent.height/4
+            color: "#c1f9c1"
 
-                    Component.onCompleted: {
-                        for (var card of gamePlay.myHand)
-                            myHandListModel.append({name: card});
-                    }
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: myHandRectangle.top
+            }
+
+            Row {
+                spacing: 10
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
+                ListModel{ id: myClubsListModel }
+
                 Repeater {
-                    id: myHandRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    model: myHandListModel
+                    model: myClubsListModel
 
                     Image {
-                        id: myHandImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
                         source: name
-
-                        MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
-                            onClicked: {
-                                myFieldRectangle.moveCardFromMyHandToField(name)
-                            }
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
                         }
                     }
                 }
@@ -602,86 +547,35 @@ Rectangle {
         }
 
         Rectangle {
-            id: myClubsRectangle
-            y: 7
-            height: myFieldRectangle.height/4
-            color: "#c1f9c1"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: myHandRectangle.top
-            anchors.rightMargin: 0
-            anchors.leftMargin: 0
-            anchors.bottomMargin: 0
-
-            Row {
-                id: myClubsRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 10
-
-                ListModel{
-                    id: myClubsListModel
-                }
-
-                Repeater {
-                    id: myClubsRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    model: myClubsListModel
-
-                    Image {
-                        id: myClubsImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
-                        source: name
-                    }
-                }
-            }
-        }
-
-        Rectangle {
             id: myDiamondsRectangle
-            y: 4
-            height: myFieldRectangle.height/4
+            height: parent.height/4
             color: "#75a975"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: myClubsRectangle.top
-            anchors.bottomMargin: 0
-            anchors.rightMargin: 0
-            anchors.leftMargin: 0
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: myClubsRectangle.top
+            }
 
             Row {
-                id: myDiamondsRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 10
-
-                ListModel{
-                    id: myDiamondsListModel
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
+                ListModel{ id: myDiamondsListModel }
+
                 Repeater {
-                    id: myDiamondsRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
                     model: myDiamondsListModel
 
                     Image {
-                        id: myDiamondsImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
                         source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
                     }
                 }
             }
@@ -689,38 +583,34 @@ Rectangle {
 
         Rectangle {
             id: mySpadesRectangle
+            height: parent.height/4
             color: "#b7e6b7"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: myDiamondsRectangle.top
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: myDiamondsRectangle.top
+            }
 
             Row {
-                id: mySpadesRow
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 10
-
-                ListModel{
-                    id: mySpadesListModel
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                    bottom: parent.bottom
                 }
 
+                ListModel{ id: mySpadesListModel }
+
                 Repeater {
-                    id: mySpadesRepeater
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
                     model: mySpadesListModel
 
                     Image {
-                        id: mySpadesImage
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.topMargin: parent.height/15
-                        anchors.bottomMargin: parent.height/15
-                        fillMode: Image.PreserveAspectFit
                         source: name
+                        fillMode: Image.PreserveAspectFit
+                        anchors {
+                            top: parent.top; topMargin: parent.height/15
+                            bottom: parent.bottom; bottomMargin: parent.height/15
+                        }
                     }
                 }
             }
@@ -728,30 +618,32 @@ Rectangle {
     }
 
     Rectangle {
-        id: separatorRectangle
+        id: separator
         color: "#000000"
-        anchors.top: enemyFieldRectangle.bottom
-        anchors.bottom: myFieldRectangle.top
-        anchors.left: specialCardsRectangle.right
-        anchors.right: scoreRectangle.left
+        anchors {
+            left: specialCardsRectangle.right
+            right: scoreRectangle.left
+            top: enemyFieldRectangle.bottom
+            bottom: myFieldRectangle.top
+        }
     }
 
     Rectangle {
         id: menuShadow
+        visible: !gamePlay.isGameStarted
         anchors.fill: parent
         color: "#000000"
         opacity: 0.4
-        visible: !gamePlay.isGameStarted
     }
 
     Rectangle {
         id: menuRectangle
+        visible: !gamePlay.isGameStarted
+        color: "#a7c9e3"
+        radius: 10
         height: parent.height/4
         width: parent.width/1.5
         anchors.centerIn: parent
-        color: "#a7c9e3"
-        radius: 10
-        visible: !gamePlay.isGameStarted
 
         Text {
             text: {
@@ -766,21 +658,20 @@ Rectangle {
                     else return "DRAW!"
                 }
             }
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.bottom: parent.verticalCenter
-            anchors.topMargin: parent.height/16
-            anchors.bottomMargin: parent.height/16
             font.pixelSize: parent.height/4
             font.bold: true
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top; topMargin: parent.height/16
+                bottom: parent.verticalCenter; bottomMargin: parent.height/16
+            }
         }
 
         Button {
-            id: startGameButton
+            onClicked: gamePlay.startNewGame()
             height: parent.height/1.5
             width: parent.width/1.5
             anchors.centerIn: parent
-            onClicked: gamePlay.startNewGame()
             visible: {
                 if (gamePlay.roundWinners == 'xxx') return true
                 else false
@@ -788,52 +679,42 @@ Rectangle {
 
             Text {
                 text: qsTr("Start Game")
-                anchors.centerIn: parent
-                font.pixelSize: menuRectangle.height/4
+                font.pixelSize: parent.height/4
                 font.bold: true
+                anchors.centerIn: parent
             }
         }
 
         Button {
-            id: playAgainButton
-            height: parent.height/8
-            anchors.right: parent.horizontalCenter
-            anchors.top: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.rightMargin: parent.width/16
-            anchors.leftMargin: parent.width/16
-            anchors.topMargin: parent.height/16
-            anchors.bottomMargin: parent.height/16
-            font.pixelSize: playAgainButton.height/2
             onClicked: gamePlay.startNewGame()
+            anchors {
+                left: parent.left; leftMargin: parent.width/16
+                right: parent.horizontalCenter; rightMargin: parent.width/16
+                top: parent.verticalCenter; topMargin: parent.height/16
+                bottom: parent.bottom; bottomMargin: parent.height/16
+            }
             visible: {
                 if (gamePlay.roundWinners == 'xxx') return false
                 else true
             }
 
-
             Text {
                 text: qsTr("Play Again")
-                anchors.centerIn: parent
                 font.pixelSize: parent.height/4
                 font.bold: true
+                anchors.centerIn: parent
             }
         }
 
         Button {
-            id: exitButton
-            height: parent.height/8
-            anchors.right: parent.right
-            anchors.top: parent.verticalCenter
-            anchors.left: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.rightMargin: parent.width/16
-            anchors.leftMargin: parent.width/16
-            anchors.topMargin: parent.height/16
-            anchors.bottomMargin: parent.height/16
-            font.pixelSize: exitButton.height/2
             onClicked: gamePlay.exitGame()
+            height: parent.height/8
+            anchors {
+                left: parent.horizontalCenter; leftMargin: parent.width/16
+                right: parent.right; rightMargin: parent.width/16
+                top: parent.verticalCenter; topMargin: parent.height/16
+                bottom: parent.bottom; bottomMargin: parent.height/16
+            }
             visible: {
                 if (gamePlay.roundWinners == 'xxx') return false
                 else true
@@ -842,11 +723,10 @@ Rectangle {
 
             Text {
                 text: qsTr("Exit")
-                anchors.centerIn: parent
                 font.pixelSize: parent.height/4
                 font.bold: true
+                anchors.centerIn: parent
             }
-
         }
     }
 }
