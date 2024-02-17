@@ -6,8 +6,8 @@ import Myst
 
 Window {
     id: window
-    width: 1920/5.5*1.25//mainScreen.width
-    height: 1080/2.5*1.25//mainScreen.height
+    width: 1920/2.25
+    height: 1080/2
 
     visible: true
     title: "Myst"

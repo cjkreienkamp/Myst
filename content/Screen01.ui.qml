@@ -10,8 +10,8 @@ import QtQuick.Controls 2.15
 import Christopher 1.0
 
 Rectangle {
-    width: window.width//1920/5.5*1.25
-    height: window.height//1080/2.5*1.25
+    width: window.width //1920/2.25
+    height: window.height //1080/2
 
     GamePlay {
         id: gamePlay
@@ -47,7 +47,7 @@ Rectangle {
         }
 
         Button {
-            enabled: {gamePlay.isMyTurn && gamePlay.isGameStarted}
+            enabled: gamePlay.isMyTurn && gamePlay.isGameStarted
             onClicked: gamePlay.playMyCard("pass")
             height: parent.height/10
             anchors {
@@ -90,10 +90,7 @@ Rectangle {
             height: parent.height/9
             width: height
             radius: 10
-            color: {
-                if (gamePlay.enemyHasPassed) return "#000000"
-                else return "#a7c9e3"
-            }
+            color: gamePlay.enemyHasPassed ? "black" : "#a7c9e3"
             anchors {
                 bottom: parent.verticalCenter; bottomMargin: parent.height/64
                 horizontalCenter: parent.horizontalCenter
@@ -101,10 +98,7 @@ Rectangle {
 
             Text {
                 text: gamePlay.enemyScore
-                color: {
-                    if (gamePlay.enemyHasPassed) return "#a7c9e3"
-                    else return "#000000"
-                }
+                color: gamePlay.enemyHasPassed ? "#a7c9e3" : "black"
                 font.pixelSize: parent.height/2
                 font.bold: true
                 anchors.centerIn: parent
@@ -126,10 +120,7 @@ Rectangle {
             height: parent.height/9
             width: height
             radius: 10
-            color: {
-                if (gamePlay.myHasPassed) return "#000000"
-                else return "#a7c9e3"
-            }
+            color: gamePlay.myHasPassed ? "black" : "#a7c9e3"
             anchors {
                 top: parent.verticalCenter; topMargin: parent.height/64
                 horizontalCenter: parent.horizontalCenter
@@ -137,10 +128,7 @@ Rectangle {
 
             Text {
                 text: gamePlay.myScore
-                color: {
-                    if (gamePlay.myHasPassed) return "#a7c9e3"
-                    else return "#000000"
-                }
+                color: gamePlay.myHasPassed ? "#a7c9e3" : "black"
                 font.pixelSize: parent.height/2
                 font.bold: true
                 anchors.centerIn: parent
@@ -168,10 +156,8 @@ Rectangle {
 
             Text {
                 text: qsTr("1")
-                font {
-                    pixelSize: parent.height/2
-                    bold: true
-                }
+                font.pixelSize: parent.width/2
+                font.bold: true
                 anchors.centerIn: parent
             }
         }
@@ -189,10 +175,8 @@ Rectangle {
 
             Text {
                 text: qsTr("2")
-                font {
-                    pixelSize: parent.height/2
-                    bold: true
-                }
+                font.pixelSize: parent.width/2
+                font.bold: true
                 anchors.centerIn: parent
             }
         }
@@ -210,10 +194,8 @@ Rectangle {
 
             Text {
                 text: qsTr("3")
-                font {
-                    pixelSize: parent.height/2
-                    bold: true
-                }
+                font.pixelSize: parent.width/2
+                font.bold: true
                 anchors.centerIn: parent
             }
         }
@@ -613,7 +595,7 @@ Rectangle {
 
     Rectangle {
         id: separator
-        color: "#000000"
+        color: "black"
         anchors {
             left: specialCardsRectangle.right
             right: scoreRectangle.left
@@ -626,7 +608,7 @@ Rectangle {
         id: menuShadow
         visible: !gamePlay.isGameStarted
         anchors.fill: parent
-        color: "#000000"
+        color: "black"
         opacity: 0.4
     }
 
@@ -640,17 +622,15 @@ Rectangle {
         anchors.centerIn: parent
 
         Text {
+            visible: gamePlay.roundWinners == 'xxx' ? false : true
             text: {
-                if (gamePlay.roundWinners == 'xxx') return ""
-                else if (gamePlay.roundWinners[2] == 'x') {
-                    if (gamePlay.roundWinners[0] == 'e' || gamePlay.roundWinners[1] == 'e' )
-                        return "YOU LOSE!"
+                if (gamePlay.roundWinners[2] == 'x') {
+                    if (gamePlay.roundWinners[0] == 'e' || gamePlay.roundWinners[1] == 'e' ) return "YOU LOSE!"
                     else return "YOU WIN!"
-                } else {
-                    if (gamePlay.roundWinners[2] == 'e') return "YOU LOSE!"
-                    else if (gamePlay.roundWinners[2] == 'm') return "YOU WIN!"
-                    else return "DRAW!"
                 }
+                else if (gamePlay.roundWinners[2] == 'e') return "YOU LOSE!"
+                else if (gamePlay.roundWinners[2] == 'm') return "YOU WIN!"
+                else return "DRAW!"
             }
             font.pixelSize: parent.height/4
             font.bold: true
@@ -662,14 +642,11 @@ Rectangle {
         }
 
         Button {
+            visible: gamePlay.roundWinners == 'xxx' ? true : false
             onClicked: gamePlay.startNewGame()
             height: parent.height/1.5
             width: parent.width/1.5
             anchors.centerIn: parent
-            visible: {
-                if (gamePlay.roundWinners == 'xxx') return true
-                else false
-            }
 
             Text {
                 text: qsTr("Start Game")
@@ -680,16 +657,13 @@ Rectangle {
         }
 
         Button {
+            visible: gamePlay.roundWinners == 'xxx' ? false : true
             onClicked: gamePlay.startNewGame()
             anchors {
                 left: parent.left; leftMargin: parent.width/16
                 right: parent.horizontalCenter; rightMargin: parent.width/16
                 top: parent.verticalCenter; topMargin: parent.height/16
                 bottom: parent.bottom; bottomMargin: parent.height/16
-            }
-            visible: {
-                if (gamePlay.roundWinners == 'xxx') return false
-                else true
             }
 
             Text {
@@ -709,10 +683,7 @@ Rectangle {
                 top: parent.verticalCenter; topMargin: parent.height/16
                 bottom: parent.bottom; bottomMargin: parent.height/16
             }
-            visible: {
-                if (gamePlay.roundWinners == 'xxx') return false
-                else true
-            }
+            visible: gamePlay.roundWinners == 'xxx' ? false : true
 
 
             Text {
