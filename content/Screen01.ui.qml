@@ -230,33 +230,27 @@ Rectangle {
         }
 
         function moveCardFromEnemyHandToField(imageName) {
-            for(var i=0; i<enemyHandListModel.count; ++i)
-            {
-                if (imageName === enemyHandListModel.get(i).name)
-                {
-                    enemyHandListModel.remove(i)
-                    if (imageName.includes("ace") || imageName.includes("joker")) specialCardsImage.source = imageName
-                    else if (imageName.includes("spades")) {
-                        if (imageName.includes("jack")) {
-                            mySpadesListModel.append({name: imageName})
-                        } else {
-                            enemySpadesListModel.append({name: imageName})
-                        }
-                    }
-                    else if (imageName.includes("diamonds")) {
-                        if (imageName.includes("jack")) {
-                            myDiamondsListModel.append({name: imageName})
-                        } else {
-                            enemyDiamondsListModel.append({name: imageName})
-                        }
-                    }
-                    else if (imageName.includes("clubs")) {
-                        if (imageName.includes("jack")) {
-                            myClubsListModel.append({name: imageName})
-                        } else {
-                            enemyClubsListModel.append({name: imageName})
-                        }
-                    }
+            enemyHandListModel.remove(0)
+            if (imageName.includes("ace") || imageName.includes("joker")) specialCardsImage.source = imageName
+            else if (imageName.includes("spades")) {
+                if (imageName.includes("jack")) {
+                    mySpadesListModel.append({name: imageName})
+                } else {
+                    enemySpadesListModel.append({name: imageName})
+                }
+            }
+            else if (imageName.includes("diamonds")) {
+                if (imageName.includes("jack")) {
+                    myDiamondsListModel.append({name: imageName})
+                } else {
+                    enemyDiamondsListModel.append({name: imageName})
+                }
+            }
+            else if (imageName.includes("clubs")) {
+                if (imageName.includes("jack")) {
+                    myClubsListModel.append({name: imageName})
+                } else {
+                    enemyClubsListModel.append({name: imageName})
                 }
             }
         }
@@ -299,7 +293,7 @@ Rectangle {
                     onEnemyHandChanged: {
                         enemyHandListModel.clear();
                         for (var card of gamePlay.enemyHand)
-                            enemyHandListModel.append({name: card});
+                            enemyHandListModel.append({name: "images/back_of_card.png"});
                     }
                     onEnemyCardPlayed: {
                         enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyCard)

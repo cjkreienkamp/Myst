@@ -19,7 +19,7 @@ std::string GamePlay::drawCard()
 std::string GamePlay::fromCardNotationToImageName(std::string cardNotation)
 {
     if (cardNotation == "XX")
-        return "images/red_joker.png";
+        return "images/joker.jpeg";
 
     std::map<char, std::string> rank_map = {{'A',"ace"}, {'K',"king"}, {'Q',"queen"}, {'J',"jack"}, {'T',"10"},
                                             {'9',"9"}, {'8',"8"}, {'7',"7"}, {'6',"6"}, {'5',"5"}};
@@ -32,7 +32,7 @@ std::string GamePlay::fromCardNotationToImageName(std::string cardNotation)
 
 std::string GamePlay::fromImageNameToCardNotation(std::string imageName)
 {
-    if (imageName == "images/red_joker.png")
+    if (imageName == "images/joker.jpeg")
         return "XX";
 
     std::map<std::string, char> rank_map = {{"ace",'A'}, {"king",'K'}, {"queen",'Q'}, {"jack",'J'}, {"10",'T'},
