@@ -109,9 +109,8 @@ void GamePlay::startNewRound()
     } else {
         m_myHand.push_back( drawCard() ); emit myHandChanged();
         m_enemyHand.push_back( drawCard() ); emit enemyHandChanged();
+        if (!m_isMyTurn) startNextTurn();
     }
-
-    if (!m_isMyTurn) startNextTurn();
 }
 
 GamePlay::GamePlay(QObject *parent)
@@ -238,11 +237,14 @@ void GamePlay::startNextTurn()
 
     if (m_isMyTurn) {
         cardPlayedThisTurn = m_myCard;
-        if (cardPlayedThisTurn == "pass") setMyHasPassed(true);
+        if (cardPlayedThisTurn == "pass") {
+            m_myHasPassed = true; emit myHasPassedChanged();
+        }
     } else {
         cardPlayedThisTurn = chooseEnemyCard();
-        if (cardPlayedThisTurn == "pass") setEnemyHasPassed(true);
-        else emit enemyCardPlayed();
+        if (cardPlayedThisTurn == "pass") {
+            m_enemyHasPassed = true; emit enemyHasPassedChanged();
+        } else emit enemyCardPlayed();
     }
 
     addToCardsPlayedThisRound(cardPlayedThisTurn);
@@ -303,20 +305,6 @@ void GamePlay::changeTurn()
     if ( (m_isMyTurn && !m_enemyHasPassed)
         || (!m_isMyTurn && !m_myHasPassed) ) {
         m_isMyTurn = !m_isMyTurn; emit isMyTurnChanged();
-    }
-}
-
-void GamePlay::setMyHasPassed( bool passed )
-{
-    if (passed != m_myHasPassed) {
-        m_myHasPassed = !m_myHasPassed; emit myHasPassedChanged();
-    }
-}
-
-void GamePlay::setEnemyHasPassed( bool passed )
-{
-    if (passed != m_enemyHasPassed) {
-        m_enemyHasPassed = !m_enemyHasPassed; emit enemyHasPassedChanged();
     }
 }
 

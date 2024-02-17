@@ -8,8 +8,8 @@ class GamePlay : public QObject
     Q_OBJECT
     Q_PROPERTY(QList<QString> myHand READ myHand NOTIFY myHandChanged FINAL)
     Q_PROPERTY(QList<QString> enemyHand READ enemyHand NOTIFY enemyHandChanged FINAL)
-    Q_PROPERTY(bool myHasPassed READ myHasPassed WRITE setMyHasPassed NOTIFY myHasPassedChanged FINAL)
-    Q_PROPERTY(bool enemyHasPassed READ enemyHasPassed WRITE setEnemyHasPassed NOTIFY enemyHasPassedChanged FINAL)
+    Q_PROPERTY(bool myHasPassed READ myHasPassed NOTIFY myHasPassedChanged FINAL)
+    Q_PROPERTY(bool enemyHasPassed READ enemyHasPassed NOTIFY enemyHasPassedChanged FINAL)
     Q_PROPERTY(bool isMyTurn READ isMyTurn NOTIFY isMyTurnChanged FINAL)
     Q_PROPERTY(bool isGameStarted READ isGameStarted NOTIFY isGameStartedChanged FINAL)
     Q_PROPERTY(int myScore READ myScore NOTIFY myScoreChanged FINAL)
@@ -43,8 +43,6 @@ private:
     void startNewRound();
     std::string chooseEnemyCard();
     void addToCardsPlayedThisRound( std::string );
-    void setMyHasPassed( bool );
-    void setEnemyHasPassed( bool );
     void changeTurn();
     void sleep();
 
@@ -73,7 +71,7 @@ signals: // these signal to the UI that it needs to update
     QString roundWinnersChanged();
     QString enemyCardPlayed();
 
-public slots: // these are functions that the UI can initiate
+public slots: // these are functions that the UI can call
     void startNewGame();
     void playMyCard( QString );
     void exitGame();
