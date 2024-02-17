@@ -124,7 +124,6 @@ void GamePlay::startNewRound()
     } else {
         m_myHand.push_back( drawCard() ); emit myHandChanged();
         m_enemyHand.push_back( drawCard() ); emit enemyHandChanged();
-        if (!m_isMyTurn) startNextTurn();
     }
 }
 
@@ -205,7 +204,6 @@ QString GamePlay::roundWinners()
 
 void GamePlay::startNewGame()
 {
-    m_isGameStarted = true; emit isGameStartedChanged();
     copy(&possible_cards[0], &possible_cards[possible_cards.size()], back_inserter(deck));
     m_myHand.clear();
     m_enemyHand.clear();
@@ -252,8 +250,7 @@ void GamePlay::startNewGame()
 
     emit myHandChanged();
     emit enemyHandChanged();
-
-    if (!m_isMyTurn) startNextTurn();
+    m_isGameStarted = true; emit isGameStartedChanged();
 }
 
 void GamePlay::startNextTurn()
@@ -278,7 +275,6 @@ void GamePlay::startNextTurn()
         startNewRound();
     } else {
         changeTurn();
-        if (!m_isMyTurn) startNextTurn();
     }
 }
 
@@ -334,8 +330,9 @@ void GamePlay::changeTurn()
 {
     if ( (m_isMyTurn && !m_enemyHasPassed)
         || (!m_isMyTurn && !m_myHasPassed) ) {
-        m_isMyTurn = !m_isMyTurn; emit isMyTurnChanged();
+        m_isMyTurn = !m_isMyTurn;
     }
+    emit isMyTurnChanged();
 }
 
 void GamePlay::playMyCard(QString card)

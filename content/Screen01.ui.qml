@@ -211,6 +211,12 @@ Rectangle {
             bottom: parent.verticalCenter; bottomMargin: parent.height/128
         }
 
+        Timer {
+            running: !gamePlay.isMyTurn && !gamePlay.enemyHasPassed && gamePlay.isGameStarted
+            interval: 1000
+            onTriggered: gamePlay.startNextTurn()
+        }
+
         function moveCardFromEnemyHandToField(imageName) {
             enemyHandListModel.remove(0)
             if (imageName.includes("ace") || imageName.includes("joker")) specialCardsImage.source = imageName
