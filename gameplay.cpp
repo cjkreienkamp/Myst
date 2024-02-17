@@ -9,6 +9,14 @@
 #include <thread>
 #include <chrono>
 
+GamePlay::GamePlay(QObject *parent)
+    : QObject{parent}
+    , m_myScore(0)
+    , m_enemyScore(0)
+    , m_roundWinners("xxx")
+    , m_isGameStarted(false)
+{}
+
 std::string GamePlay::drawCard()
 {
     std::string card = deck.back();
@@ -56,6 +64,10 @@ void GamePlay::updateScores()
         else if (rank == 'A') ace_map[ suit ] = true;
     }
 
+    if (ace_map['s']) m_isAceSpadesActive = true; emit isAceSpadesActiveChanged();
+    if (ace_map['d']) m_isAceDiamondsActive = true; emit isAceDiamondsActiveChanged();
+    if (ace_map['c']) m_isAceClubsActive = true; emit isAceClubsActiveChanged();
+
     std::map<char,int> ranksToValues = {{'K',10}, {'Q',10}, {'J',10}, {'T',10},
                                         {'9',9}, {'8',8}, {'7',7}, {'6',6}, {'5',5}};
 
@@ -98,6 +110,9 @@ void GamePlay::startNewRound()
     updateScores();
     m_myHasPassed = false; emit myHasPassedChanged();
     m_enemyHasPassed = false; emit enemyHasPassedChanged();
+    m_isAceSpadesActive = false; emit isAceSpadesActiveChanged();
+    m_isAceDiamondsActive = false; emit isAceDiamondsActiveChanged();
+    m_isAceClubsActive = false; emit isAceClubsActiveChanged();
 
     if ( ( round == 2 && (
                           (m_roundWinners[0] == m_roundWinners[1] && m_roundWinners[0] != 't') ||
@@ -112,14 +127,6 @@ void GamePlay::startNewRound()
         if (!m_isMyTurn) startNextTurn();
     }
 }
-
-GamePlay::GamePlay(QObject *parent)
-    : QObject{parent}
-    , m_myScore(0)
-    , m_enemyScore(0)
-    , m_roundWinners("xxx")
-    , m_isGameStarted(false)
-{}
 
 QList<QString> GamePlay::myHand()
 {
@@ -176,6 +183,21 @@ QString GamePlay::enemyCard()
     return QString::fromStdString( m_enemyCard );
 }
 
+bool GamePlay::isAceSpadesActive()
+{
+    return m_isAceSpadesActive;
+}
+
+bool GamePlay::isAceDiamondsActive()
+{
+    return m_isAceDiamondsActive;
+}
+
+bool GamePlay::isAceClubsActive()
+{
+    return m_isAceClubsActive;
+}
+
 QString GamePlay::roundWinners()
 {
     return QString::fromStdString(m_roundWinners);
@@ -183,6 +205,7 @@ QString GamePlay::roundWinners()
 
 void GamePlay::startNewGame()
 {
+    m_isGameStarted = true; emit isGameStartedChanged();
     copy(&possible_cards[0], &possible_cards[possible_cards.size()], back_inserter(deck));
     m_myHand.clear();
     m_enemyHand.clear();
@@ -191,7 +214,9 @@ void GamePlay::startNewGame()
     m_roundWinners = "xxx"; emit roundWinnersChanged();
     m_myHasPassed = false; emit myHasPassedChanged();
     m_enemyHasPassed = false; emit enemyHasPassedChanged();
-    m_isGameStarted = true; emit isGameStartedChanged();
+    m_isAceSpadesActive = false; emit isAceSpadesActiveChanged();
+    m_isAceDiamondsActive = false; emit isAceDiamondsActiveChanged();
+    m_isAceClubsActive = false; emit isAceClubsActiveChanged();
 
     for (int i = 0; i < deck.size() - 1; i++) {
         int j = i + arc4random() % (deck.size() - i);
@@ -297,6 +322,11 @@ void GamePlay::addToCardsPlayedThisRound(std::string card)
     qDebug() << "---------------------------";
     for (auto card : m_cardsPlayedThisRound) qDebug() << card;
 
+    if (card == "XX") {
+        m_isAceSpadesActive = false; emit isAceSpadesActiveChanged();
+        m_isAceDiamondsActive = false; emit isAceDiamondsActiveChanged();
+        m_isAceClubsActive = false; emit isAceClubsActiveChanged();
+    }
     updateScores();
 }
 

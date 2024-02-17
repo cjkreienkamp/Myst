@@ -273,9 +273,9 @@ Rectangle {
                 Connections {
                     target: gamePlay
                     onEnemyHandChanged: {
-                        enemyHandListModel.clear();
+                        enemyHandListModel.clear()
                         for (var card of gamePlay.enemyHand)
-                            enemyHandListModel.append({name: "images/back_of_card.png"});
+                            enemyHandListModel.append({name: "images/back_of_card.png"})
                     }
                     onEnemyCardPlayed: {
                         enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyCard)
@@ -309,6 +309,7 @@ Rectangle {
 
                     Image {
                         source: name
+                        rotation: gamePlay.isAceClubsActive ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -344,6 +345,7 @@ Rectangle {
 
                     Image {
                         source: name
+                        rotation: gamePlay.isAceDiamondsActive ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -379,6 +381,7 @@ Rectangle {
 
                     Image {
                         source: name
+                        rotation: gamePlay.isAceSpadesActive ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -478,9 +481,9 @@ Rectangle {
                 Connections {
                     target: gamePlay
                     onMyHandChanged: {
-                        myHandListModel.clear();
+                        myHandListModel.clear()
                         for (var card of gamePlay.myHand)
-                            myHandListModel.append({name: card});
+                            myHandListModel.append({name: card})
                     }
                 }
             }
@@ -512,6 +515,7 @@ Rectangle {
 
                     Image {
                         source: name
+                        rotation: gamePlay.isAceClubsActive ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -547,6 +551,7 @@ Rectangle {
 
                     Image {
                         source: name
+                        rotation: gamePlay.isAceDiamondsActive ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -582,6 +587,7 @@ Rectangle {
 
                     Image {
                         source: name
+                        rotation: gamePlay.isAceSpadesActive ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15

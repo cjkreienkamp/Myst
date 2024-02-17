@@ -16,6 +16,9 @@ class GamePlay : public QObject
     Q_PROPERTY(int enemyScore READ enemyScore NOTIFY enemyScoreChanged FINAL)
     Q_PROPERTY(QString roundWinners READ roundWinners NOTIFY roundWinnersChanged FINAL)
     Q_PROPERTY(QString enemyCard READ enemyCard NOTIFY enemyCardPlayed FINAL)
+    Q_PROPERTY(bool isAceSpadesActive READ isAceSpadesActive NOTIFY isAceSpadesActiveChanged FINAL)
+    Q_PROPERTY(bool isAceDiamondsActive READ isAceDiamondsActive NOTIFY isAceDiamondsActiveChanged FINAL)
+    Q_PROPERTY(bool isAceClubsActive READ isAceClubsActive NOTIFY isAceClubsActiveChanged FINAL)
 
 private:
     std::vector<std::string> possible_cards { "XX", "XX",
@@ -35,6 +38,10 @@ private:
     std::string m_myCard;
     std::string m_enemyCard;
     std::string m_roundWinners;
+    bool m_isAceSpadesActive;
+    bool m_isAceDiamondsActive;
+    bool m_isAceClubsActive;
+
     std::string drawCard();
     std::string fromCardNotationToImageName( std::string );
     std::string fromImageNameToCardNotation( std::string );
@@ -58,6 +65,11 @@ public: // these are variables (built as functions) that the UI can view
     int enemyScore();
     QString roundWinners();
     QString enemyCard();
+    bool isAceSpadesActive();
+    bool isAceDiamondsActive();
+    bool isAceClubsActive();
+
+
 
 signals: // these signal to the UI that it needs to update
     QList<QString> myHandChanged();
@@ -70,6 +82,9 @@ signals: // these signal to the UI that it needs to update
     int enemyScoreChanged();
     QString roundWinnersChanged();
     QString enemyCardPlayed();
+    bool isAceSpadesActiveChanged();
+    bool isAceDiamondsActiveChanged();
+    bool isAceClubsActiveChanged();
 
 public slots: // these are functions that the UI can call
     void startNewGame();
