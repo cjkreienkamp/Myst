@@ -14,7 +14,7 @@ if (Qt6_VERSION VERSION_GREATER_EQUAL 6.3)
 endif()
 
 qt_add_executable(MystApp src/main.cpp
-    gameplay.h gameplay.cpp)
+    src/gameplay.h src/gameplay.cpp)
 
 qt_add_resources(MystApp "configuration"
     PREFIX "/"
