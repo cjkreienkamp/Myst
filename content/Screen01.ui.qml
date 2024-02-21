@@ -15,7 +15,14 @@ Rectangle {
 
     GamePlay {
         id: gamePlay
-        onRoundWinnersChanged: {
+        onRoundWinnersChanged: delayAfterRound.running = true
+    }
+
+    Timer {
+        id: delayAfterRound
+        repeat: false
+        interval: 2000
+        onTriggered: {
             mySpadesListModel.clear()
             myDiamondsListModel.clear()
             myClubsListModel.clear()
@@ -214,7 +221,7 @@ Rectangle {
         Timer {
             running: !gamePlay.isMyTurn && !gamePlay.enemyHasPassed && gamePlay.isGameStarted
             interval: 1000
-            onTriggered: gamePlay.startNextTurn()
+            onTriggered: gamePlay.playEnemyCard()
         }
 
         function moveCardFromEnemyHandToField(imageName) {
@@ -283,9 +290,7 @@ Rectangle {
                         for (var card of gamePlay.enemyHand)
                             enemyHandListModel.append({name: "images/back_of_card.png"})
                     }
-                    onEnemyCardPlayed: {
-                        enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyCard)
-                    }
+                    onEnemyCardPlayed: enemyFieldRectangle.moveCardFromEnemyHandToField(gamePlay.enemyCard)
                 }
             }
         }
@@ -616,93 +621,105 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        id: menuShadow
-        visible: !gamePlay.isGameStarted
-        anchors.fill: parent
-        color: "black"
-        opacity: 0.4
+    Timer {
+        id: delayForEndOfGame
+        running: !gamePlay.isGameStarted
+        interval: 2000
+        onTriggered: menu.visible = true
     }
 
-    Rectangle {
-        id: menuRectangle
-        visible: !gamePlay.isGameStarted
-        color: "#a7c9e3"
-        radius: 10
-        height: parent.height/4
-        width: parent.width/1.5
-        anchors.centerIn: parent
+    Item {
+        id: menu
+        visible: gamePlay.isGameStarted ? false : visible
+        anchors.fill: parent
 
-        Text {
-            visible: gamePlay.roundWinners == 'xxx' ? false : true
-            text: {
-                if (gamePlay.roundWinners[2] == 'x') {
-                    if (gamePlay.roundWinners[0] == 'e' || gamePlay.roundWinners[1] == 'e' ) return "YOU LOSE!"
-                    else return "YOU WIN!"
-                }
-                else if (gamePlay.roundWinners[2] == 'e') return "YOU LOSE!"
-                else if (gamePlay.roundWinners[2] == 'm') return "YOU WIN!"
-                else return "DRAW!"
-            }
-            font.pixelSize: parent.height/4
-            font.bold: true
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: parent.top; topMargin: parent.height/16
-                bottom: parent.verticalCenter; bottomMargin: parent.height/16
-            }
+        Rectangle {
+            id: menuShadow
+            anchors.fill: parent
+            color: "black"
+            opacity: 0.4
         }
 
-        Button {
-            visible: gamePlay.roundWinners == 'xxx' ? true : false
-            onClicked: gamePlay.startNewGame()
-            height: parent.height/1.5
+        Rectangle {
+            id: menuRectangle
+            color: "#a7c9e3"
+            radius: 10
+            height: parent.height/4
             width: parent.width/1.5
             anchors.centerIn: parent
 
-            Text {
-                text: qsTr("Start Game")
-                font.pixelSize: parent.height/4
-                font.bold: true
-                anchors.centerIn: parent
-            }
-        }
-
-        Button {
-            visible: gamePlay.roundWinners == 'xxx' ? false : true
-            onClicked: gamePlay.startNewGame()
-            anchors {
-                left: parent.left; leftMargin: parent.width/16
-                right: parent.horizontalCenter; rightMargin: parent.width/16
-                top: parent.verticalCenter; topMargin: parent.height/16
-                bottom: parent.bottom; bottomMargin: parent.height/16
-            }
 
             Text {
-                text: qsTr("Play Again")
+                visible: gamePlay.roundWinners == 'xxx' ? false : true
+                text: {
+                    if (gamePlay.roundWinners[2] == 'x') {
+                        if (gamePlay.roundWinners[0] == 'e' || gamePlay.roundWinners[1] == 'e' ) return "YOU LOSE!"
+                        else return "YOU WIN!"
+                    }
+                    else if (gamePlay.roundWinners[2] == 'e') return "YOU LOSE!"
+                    else if (gamePlay.roundWinners[2] == 'm') return "YOU WIN!"
+                    else return "DRAW!"
+                }
                 font.pixelSize: parent.height/4
                 font.bold: true
-                anchors.centerIn: parent
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top; topMargin: parent.height/16
+                    bottom: parent.verticalCenter; bottomMargin: parent.height/16
+                }
             }
-        }
 
-        Button {
-            onClicked: gamePlay.exitGame()
-            height: parent.height/8
-            anchors {
-                left: parent.horizontalCenter; leftMargin: parent.width/16
-                right: parent.right; rightMargin: parent.width/16
-                top: parent.verticalCenter; topMargin: parent.height/16
-                bottom: parent.bottom; bottomMargin: parent.height/16
-            }
-            visible: gamePlay.roundWinners == 'xxx' ? false : true
-
-
-            Text {
-                text: qsTr("Exit")
-                font.pixelSize: parent.height/4
-                font.bold: true
+            Button {
+                visible: gamePlay.roundWinners == 'xxx' ? true : false
+                onClicked: gamePlay.startNewGame()
+                height: parent.height/1.5
+                width: parent.width/1.5
                 anchors.centerIn: parent
+
+                Text {
+                    text: qsTr("Start Game")
+                    font.pixelSize: parent.height/4
+                    font.bold: true
+                    anchors.centerIn: parent
+                }
+            }
+
+            Button {
+                visible: gamePlay.roundWinners == 'xxx' ? false : true
+                onClicked: gamePlay.startNewGame()
+                anchors {
+                    left: parent.left; leftMargin: parent.width/16
+                    right: parent.horizontalCenter; rightMargin: parent.width/16
+                    top: parent.verticalCenter; topMargin: parent.height/16
+                    bottom: parent.bottom; bottomMargin: parent.height/16
+                }
+
+                Text {
+                    text: qsTr("Play Again")
+                    font.pixelSize: parent.height/4
+                    font.bold: true
+                    anchors.centerIn: parent
+                }
+            }
+
+            Button {
+                onClicked: gamePlay.exitGame()
+                height: parent.height/8
+                anchors {
+                    left: parent.horizontalCenter; leftMargin: parent.width/16
+                    right: parent.right; rightMargin: parent.width/16
+                    top: parent.verticalCenter; topMargin: parent.height/16
+                    bottom: parent.bottom; bottomMargin: parent.height/16
+                }
+                visible: gamePlay.roundWinners == 'xxx' ? false : true
+
+
+                Text {
+                    text: qsTr("Exit")
+                    font.pixelSize: parent.height/4
+                    font.bold: true
+                    anchors.centerIn: parent
+                }
             }
         }
     }

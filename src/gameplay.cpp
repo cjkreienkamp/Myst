@@ -179,7 +179,7 @@ int GamePlay::enemyScore()
 
 QString GamePlay::enemyCard()
 {
-    return QString::fromStdString( m_enemyCard );
+    return QString::fromStdString( fromCardNotationToImageName(m_enemyCard) );
 }
 
 bool GamePlay::isAceSpadesActive()
@@ -253,6 +253,26 @@ void GamePlay::startNewGame()
     m_isGameStarted = true; emit isGameStartedChanged();
 }
 
+void GamePlay::playMyCard(QString card)
+{
+    m_myCard = card.toUtf8().constData();
+    if ( m_myCard != "pass") {
+        m_myCard = fromImageNameToCardNotation(m_myCard);
+    }
+    startNextTurn();
+}
+
+void GamePlay::playEnemyCard()
+{
+    int index_of_chosen_card = arc4random() % (m_enemyHand.size() + 1);
+    if (index_of_chosen_card == m_enemyHand.size()) {
+        m_enemyCard = "pass";
+    } else {
+        m_enemyCard = m_enemyHand[index_of_chosen_card];
+    }
+    startNextTurn();
+}
+
 void GamePlay::startNextTurn()
 {
     std::string cardPlayedThisTurn;
@@ -263,7 +283,7 @@ void GamePlay::startNextTurn()
             m_myHasPassed = true; emit myHasPassedChanged();
         }
     } else {
-        cardPlayedThisTurn = chooseEnemyCard();
+        cardPlayedThisTurn = m_enemyCard;
         if (cardPlayedThisTurn == "pass") {
             m_enemyHasPassed = true; emit enemyHasPassedChanged();
         } else emit enemyCardPlayed();
@@ -271,24 +291,8 @@ void GamePlay::startNextTurn()
 
     addToCardsPlayedThisRound(cardPlayedThisTurn);
 
-    if (m_myHasPassed && m_enemyHasPassed) {
-        startNewRound();
-    } else {
-        changeTurn();
-    }
-}
-
-std::string GamePlay::chooseEnemyCard()
-{
-    std::string card;
-    int index_of_chosen_card = arc4random() % (m_enemyHand.size() + 1);
-    if (index_of_chosen_card == m_enemyHand.size()) {
-        card = "pass";
-    } else {
-        card = m_enemyHand[index_of_chosen_card];
-        m_enemyCard = fromCardNotationToImageName( card );
-    }
-    return card;
+    if (m_myHasPassed && m_enemyHasPassed) startNewRound();
+    else changeTurn();
 }
 
 void GamePlay::addToCardsPlayedThisRound(std::string card)
@@ -299,7 +303,6 @@ void GamePlay::addToCardsPlayedThisRound(std::string card)
         if (card[0] == 'J') {
             m_myHand.push_back( drawCard() );
             m_myHand.push_back( drawCard() );
-            emit myHandChanged();
         }
         card.insert(0,"m");
         emit myHandChanged();
@@ -308,7 +311,6 @@ void GamePlay::addToCardsPlayedThisRound(std::string card)
         if (card[0] == 'J') {
             m_enemyHand.push_back( drawCard() );
             m_enemyHand.push_back( drawCard() );
-            emit enemyHandChanged();
         }
         card.insert(0,"e");
         emit enemyHandChanged();
@@ -333,15 +335,6 @@ void GamePlay::changeTurn()
         m_isMyTurn = !m_isMyTurn;
     }
     emit isMyTurnChanged();
-}
-
-void GamePlay::playMyCard(QString card)
-{
-    m_myCard = card.toUtf8().constData();
-    if ( m_myCard != "pass") {
-        m_myCard = fromImageNameToCardNotation(m_myCard);
-    }
-    startNextTurn();
 }
 
 void GamePlay::sleep()

@@ -46,6 +46,7 @@ private:
     std::string fromCardNotationToImageName( std::string );
     std::string fromImageNameToCardNotation( std::string );
     void updateScores();
+    void startNextTurn();
     void startNewRound();
     std::string chooseEnemyCard();
     void addToCardsPlayedThisRound( std::string );
@@ -88,7 +89,7 @@ signals: // these signal to the UI that it needs to update
 public slots: // these are functions that the UI can call
     void startNewGame();
     void playMyCard( QString );
-    void startNextTurn();
+    void playEnemyCard();
     void exitGame();
 };
 
