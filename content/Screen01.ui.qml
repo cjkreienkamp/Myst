@@ -21,7 +21,7 @@ Rectangle {
     Timer {
         id: delayAfterRound
         repeat: false
-        interval: 2000
+        interval: 1000
         onTriggered: {
             mySpadesListModel.clear()
             myDiamondsListModel.clear()
@@ -220,7 +220,7 @@ Rectangle {
 
         Timer {
             running: !gamePlay.isMyTurn && !gamePlay.enemyHasPassed && gamePlay.isGameStarted
-            interval: 1000
+            interval: delayAfterRound.running ? 1500 : 500
             onTriggered: gamePlay.playEnemyCard()
         }
 
@@ -320,7 +320,7 @@ Rectangle {
 
                     Image {
                         source: name
-                        rotation: gamePlay.isAceClubsActive ? 90 : 0
+                        rotation: gamePlay.isAceClubsActive && !name.includes("king") ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -356,7 +356,7 @@ Rectangle {
 
                     Image {
                         source: name
-                        rotation: gamePlay.isAceDiamondsActive ? 90 : 0
+                        rotation: gamePlay.isAceDiamondsActive && !name.includes("king") ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -392,7 +392,7 @@ Rectangle {
 
                     Image {
                         source: name
-                        rotation: gamePlay.isAceSpadesActive ? 90 : 0
+                        rotation: gamePlay.isAceSpadesActive && !name.includes("king") ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -526,7 +526,7 @@ Rectangle {
 
                     Image {
                         source: name
-                        rotation: gamePlay.isAceClubsActive ? 90 : 0
+                        rotation: gamePlay.isAceClubsActive && !name.includes("king") ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -562,7 +562,7 @@ Rectangle {
 
                     Image {
                         source: name
-                        rotation: gamePlay.isAceDiamondsActive ? 90 : 0
+                        rotation: gamePlay.isAceDiamondsActive && !name.includes("king") ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -598,7 +598,7 @@ Rectangle {
 
                     Image {
                         source: name
-                        rotation: gamePlay.isAceSpadesActive ? 90 : 0
+                        rotation: gamePlay.isAceSpadesActive && !name.includes("king") ? 90 : 0
                         fillMode: Image.PreserveAspectFit
                         anchors {
                             top: parent.top; topMargin: parent.height/15
@@ -648,7 +648,6 @@ Rectangle {
             width: parent.width/1.5
             anchors.centerIn: parent
 
-
             Text {
                 visible: gamePlay.roundWinners == 'xxx' ? false : true
                 text: {
@@ -671,7 +670,10 @@ Rectangle {
 
             Button {
                 visible: gamePlay.roundWinners == 'xxx' ? true : false
-                onClicked: gamePlay.startNewGame()
+                onClicked: {
+                    menu.visible = false
+                    gamePlay.startNewGame()
+                }
                 height: parent.height/1.5
                 width: parent.width/1.5
                 anchors.centerIn: parent
@@ -686,7 +688,10 @@ Rectangle {
 
             Button {
                 visible: gamePlay.roundWinners == 'xxx' ? false : true
-                onClicked: gamePlay.startNewGame()
+                onClicked: {
+                    menu.visible = false
+                    gamePlay.startNewGame()
+                }
                 anchors {
                     left: parent.left; leftMargin: parent.width/16
                     right: parent.horizontalCenter; rightMargin: parent.width/16

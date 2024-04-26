@@ -6,8 +6,6 @@
 #include <map>
 #include <string>
 #include <regex>
-#include <thread>
-#include <chrono>
 
 GamePlay::GamePlay(QObject *parent)
     : QObject{parent}
@@ -26,8 +24,10 @@ std::string GamePlay::drawCard()
 
 std::string GamePlay::fromCardNotationToImageName(std::string cardNotation)
 {
-    if (cardNotation == "XX")
-        return "images/joker.jpeg";
+    if (cardNotation == "X1")
+        return "images/joker1.jpeg";
+    if (cardNotation == "X2")
+        return "images/joker2.jpeg";
 
     std::map<char, std::string> rank_map = {{'A',"ace"}, {'K',"king"}, {'Q',"queen"}, {'J',"jack"}, {'T',"10"},
                                             {'9',"9"}, {'8',"8"}, {'7',"7"}, {'6',"6"}, {'5',"5"}};
@@ -40,8 +40,10 @@ std::string GamePlay::fromCardNotationToImageName(std::string cardNotation)
 
 std::string GamePlay::fromImageNameToCardNotation(std::string imageName)
 {
-    if (imageName == "images/joker.jpeg")
-        return "XX";
+    if (imageName == "images/joker1.jpeg")
+        return "X1";
+    if (imageName == "images/joker2.jpeg")
+        return "X2";
 
     std::map<std::string, char> rank_map = {{"ace",'A'}, {"king",'K'}, {"queen",'Q'}, {"jack",'J'}, {"10",'T'},
                                             {"9",'9'}, {"8",'8'}, {"7",'7'}, {"6",'6'}, {"5",'5'}};
@@ -320,7 +322,7 @@ void GamePlay::addToCardsPlayedThisRound(std::string card)
     qDebug() << "---------------------------";
     for (auto card : m_cardsPlayedThisRound) qDebug() << card;
 
-    if (card == "XX") {
+    if (card[1] == 'X') {
         m_isAceSpadesActive = false; emit isAceSpadesActiveChanged();
         m_isAceDiamondsActive = false; emit isAceDiamondsActiveChanged();
         m_isAceClubsActive = false; emit isAceClubsActiveChanged();
@@ -335,11 +337,6 @@ void GamePlay::changeTurn()
         m_isMyTurn = !m_isMyTurn;
     }
     emit isMyTurnChanged();
-}
-
-void GamePlay::sleep()
-{
-    std::this_thread::sleep_for( std::chrono::seconds(1) );
 }
 
 void GamePlay::exitGame()

@@ -21,7 +21,7 @@ class GamePlay : public QObject
     Q_PROPERTY(bool isAceClubsActive READ isAceClubsActive NOTIFY isAceClubsActiveChanged FINAL)
 
 private:
-    std::vector<std::string> possible_cards { "XX", "XX",
+    std::vector<std::string> possible_cards { "X1", "X2",
         "As", "Ks", "Qs", "Js", "Ts", "9s", "8s", "7s", "6s", "5s",
         "Ad", "Kd", "Qd", "Jd", "Td", "9d", "8d", "7d", "6d", "5d",
         "Ac", "Kc", "Qc", "Jc", "Tc", "9c", "8c", "7c", "6c", "5c"};
