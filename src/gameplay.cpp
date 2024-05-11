@@ -219,11 +219,11 @@ void GamePlay::startNewGame()
     m_isAceClubsActive = false; emit isAceClubsActiveChanged();
 
     for (int i = 0; i < deck.size() - 1; i++) {
-        int j = i + arc4random() % (deck.size() - i);
+        int j = i + rand() % (deck.size() - i);
         std::swap(deck[i], deck[j]);
     }
 
-    m_isMyTurn = arc4random() % 2; emit isMyTurnChanged();
+    m_isMyTurn = rand() % 2; emit isMyTurnChanged();
 
     if ( m_isMyTurn ) {
         m_myHand.push_back( drawCard() );
@@ -238,9 +238,9 @@ void GamePlay::startNewGame()
 
     // whoever goes first, make them pick a card
     if ( m_isMyTurn ) {
-        m_myHand.erase( m_myHand.begin() + arc4random() % m_myHand.size() );
+        m_myHand.erase( m_myHand.begin() + rand() % m_myHand.size() );
     } else {
-        m_enemyHand.erase( m_enemyHand.begin() + arc4random() % m_enemyHand.size() );
+        m_enemyHand.erase( m_enemyHand.begin() + rand() % m_enemyHand.size() );
     }
 
     qDebug() << "*****MY HAND*****";
@@ -266,7 +266,7 @@ void GamePlay::playMyCard(QString card)
 
 void GamePlay::playEnemyCard()
 {
-    int index_of_chosen_card = arc4random() % (m_enemyHand.size() + 1);
+    int index_of_chosen_card = rand() % (m_enemyHand.size() + 1);
     if (index_of_chosen_card == m_enemyHand.size()) {
         m_enemyCard = "pass";
     } else {
